@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { UserController } from "./user.controller";
-import { createUserZodSchema } from "./user.validation";
+import { createUserZodSchema, updateUserZodSchema } from "./user.validation";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "./user.interface";
 
@@ -24,6 +24,7 @@ router.post("/addresses", checkAuth(Role.USER), UserController.addNewAddress);
 router.patch(
   "/:id",
   checkAuth(...Object.values(Role)),
+  validateRequest(updateUserZodSchema),
   UserController.updateUser
 );
 

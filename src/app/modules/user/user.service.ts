@@ -16,7 +16,7 @@ interface AddressPayload {
   address?: IAddress | IAddress[];
 }
 
-const createUserService = async (payload: Partial<IUser>) => {
+const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
   //   const existingUser = await User.findOne({ email });
@@ -210,7 +210,7 @@ const updateUser = async (
 };
 
 export const UserService = {
-  createUserService,
+  createUser,
   getAllUsers,
   updateUser,
   addNewAddress,
