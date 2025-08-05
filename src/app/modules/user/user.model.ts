@@ -1,9 +1,11 @@
 import { model, Schema } from "mongoose";
 import {
+  AddressLabel,
   IAddress,
   IAuthProvider,
   IRiderProfile,
   IUser,
+  RiderAvailabilityStatus,
   Role,
 } from "./user.interface";
 
@@ -27,6 +29,7 @@ const authProviderSchema = new Schema<IAuthProvider>(
 const addressSchema = new Schema<IAddress>({
   label: {
     type: String,
+    enum: Object.values(AddressLabel),
     required: true,
   },
   addressLine: {
@@ -74,6 +77,7 @@ const riderProfileSchema = new Schema<IRiderProfile>({
   },
   availabilityStatus: {
     type: String,
+    enum: Object.values(RiderAvailabilityStatus),
   },
 });
 

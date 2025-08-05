@@ -39,7 +39,7 @@ export interface IAuthProvider {
 }
 
 export interface IAddress {
-  _id: string;
+  _id: Types.ObjectId;
   label: AddressLabel;
   addressLine: string;
   area: string;
