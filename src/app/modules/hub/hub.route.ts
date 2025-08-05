@@ -20,6 +20,12 @@ router.get(
   HubController.getAllHubs
 );
 
+router.get(
+  "/riders/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  HubController.findRidersByHub
+);
+
 router.patch(
   "/update/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),

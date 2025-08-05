@@ -1,5 +1,10 @@
 import z from "zod";
-import { IsActive, Role } from "./user.interface";
+import {
+  IsActive,
+  RiderAvailabilityStatus,
+  Role,
+  VehicleType,
+} from "./user.interface";
 
 export const createUserZodSchema = z.object({
   name: z
@@ -70,5 +75,22 @@ export const updateUserZodSchema = z.object({
   isDeleted: z.boolean({ error: "isDeleted must be true or false" }).optional(),
   isVerified: z
     .boolean({ error: "isVerified must be true or false" })
+    .optional(),
+  riderProfile: z
+    .object({
+      vehicleType: z.enum(Object.values(VehicleType) as [string]).optional(),
+      vehicleNumber: z
+        .string({ error: "Vehicle Number must be string" })
+        .optional(),
+      licenseNumber: z
+        .string({ error: "License Number must be string" })
+        .optional(),
+      assignedHub: z
+        .string({ error: "Assigned Hub must be string" })
+        .optional(),
+      availability: z
+        .enum(Object.values(RiderAvailabilityStatus) as [string])
+        .optional(),
+    })
     .optional(),
 });

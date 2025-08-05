@@ -20,11 +20,9 @@ export enum AddressLabel {
 }
 
 export enum VehicleType {
-  BIKE = "BIKE",
-  CAR = "CAR",
-  VAN = "VAN",
-  TRUCK = "TRUCK",
-  BICYCLE = "BICYCLE",
+  MOTORBIKE = "Motorbike",
+  BICYCLE = "Bicycle",
+  SCOOTER = "Scooter",
 }
 
 export enum RiderAvailabilityStatus {

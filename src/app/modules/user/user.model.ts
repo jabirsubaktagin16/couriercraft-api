@@ -78,6 +78,7 @@ const riderProfileSchema = new Schema<IRiderProfile>({
   availabilityStatus: {
     type: String,
     enum: Object.values(RiderAvailabilityStatus),
+    default: RiderAvailabilityStatus.AVAILABLE,
   },
 });
 

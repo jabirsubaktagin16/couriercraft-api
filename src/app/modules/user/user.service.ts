@@ -153,7 +153,10 @@ const updateUser = async (
 
   if (decodedToken.role === Role.USER || decodedToken.role === Role.RIDER) {
     if (userId !== decodedToken.userId) {
-      throw new AppError(401, "You are not authorized");
+      throw new AppError(
+        httpStatusCodes.UNAUTHORIZED,
+        "You are not authorized"
+      );
     }
   }
 
@@ -167,7 +170,7 @@ const updateUser = async (
     decodedToken.role === Role.ADMIN &&
     ifUserExist.role === Role.SUPER_ADMIN
   ) {
-    throw new AppError(401, "You are not authorized");
+    throw new AppError(httpStatusCodes.UNAUTHORIZED, "You are not authorized");
   }
 
   if (payload.password) {
@@ -181,6 +184,13 @@ const updateUser = async (
   if (payload.role) {
     if (decodedToken.role === Role.USER || decodedToken.role === Role.RIDER) {
       throw new AppError(httpStatusCodes.FORBIDDEN, "You are not authorized");
+    } else {
+      if (payload.role === Role.RIDER && !payload.riderProfile) {
+        throw new AppError(
+          httpStatusCodes.BAD_REQUEST,
+          "Please add rider profile"
+        );
+      }
     }
   }
 

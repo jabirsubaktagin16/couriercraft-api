@@ -37,8 +37,19 @@ const updateHub = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const findRidersByHub = catchAsync(async (req: Request, res: Response) => {
+  const result = await HubService.findRidersByHub(req.params.id);
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: "Riders retrieved successfully",
+    data: result,
+  });
+});
+
 export const HubController = {
   createHub,
   getAllHubs,
   updateHub,
+  findRidersByHub,
 };
