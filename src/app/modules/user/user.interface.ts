@@ -38,14 +38,14 @@ export interface IAuthProvider {
 
 export interface IAddress {
   _id: Types.ObjectId;
-  label: AddressLabel;
+  label?: AddressLabel;
   addressLine: string;
   area: string;
   city: string;
   state?: string;
   postalCode: string;
   country: string;
-  isDefault: boolean;
+  isDefault?: boolean;
 }
 
 export interface IRiderProfile {

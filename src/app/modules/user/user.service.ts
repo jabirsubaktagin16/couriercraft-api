@@ -68,7 +68,7 @@ const addNewAddress = async (
 
   const isDuplicateLabel = (label: string): boolean => {
     return user.address!.some(
-      (addr) => addr.label.toLowerCase() === label.toLowerCase()
+      (addr) => addr.label!.toLowerCase() === label.toLowerCase()
     );
   };
 
