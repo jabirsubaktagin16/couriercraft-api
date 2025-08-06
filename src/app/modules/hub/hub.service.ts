@@ -20,7 +20,7 @@ const createHub = async (payload: IHub) => {
 const getAllHubs = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Hub.find(), query);
 
-  const tours = await queryBuilder
+  const hubs = await queryBuilder
     .search(hubSearchableFields)
     .filter()
     .sort()
@@ -28,7 +28,7 @@ const getAllHubs = async (query: Record<string, string>) => {
     .paginate();
 
   const [data, meta] = await Promise.all([
-    tours.build(),
+    hubs.build(),
     queryBuilder.getMeta(),
   ]);
 

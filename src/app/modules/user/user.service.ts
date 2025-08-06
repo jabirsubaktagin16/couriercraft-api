@@ -119,7 +119,7 @@ const addNewAddress = async (
 const getAllUsers = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(User.find({}, "-password"), query);
 
-  const tours = await queryBuilder
+  const users = await queryBuilder
     .search(userSearchableFields)
     .filter()
     .sort()
@@ -127,7 +127,7 @@ const getAllUsers = async (query: Record<string, string>) => {
     .paginate();
 
   const [data, meta] = await Promise.all([
-    tours.build(),
+    users.build(),
     queryBuilder.getMeta(),
   ]);
 
