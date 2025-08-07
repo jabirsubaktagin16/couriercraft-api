@@ -15,6 +15,7 @@ import { User } from "../user/user.model";
 import { DeliveryPriority, DeliveryStatus } from "./parcel.interface";
 import { Parcel } from "./parcel.model";
 import { generateTrackingId } from "../../utils/utilFunction";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
 interface ICreateParcelRequest {
   receiver: Types.ObjectId;
@@ -38,10 +39,24 @@ const createNewParcel = async (
     throw new AppError(httpStatusCodes.BAD_REQUEST, "Sender does not exist");
   }
 
+  if (!sender.phone) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "Sender phone number is required. Please add your phone number."
+    );
+  }
+
   // Validate receiver exists
   const receiver = await User.findById(payload.receiver);
   if (!receiver) {
     throw new AppError(httpStatusCodes.BAD_REQUEST, "Receiver does not exist");
+  }
+
+  if (!receiver.phone) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "Receiver phone number is required. Please ask receiver to add their phone number."
+    );
   }
 
   // Validate pickup address
@@ -149,6 +164,69 @@ const createNewParcel = async (
   return parcel;
 };
 
+const getMySentParcels = async (
+  query: Record<string, string>,
+  decodedToken: JwtPayload
+) => {
+  // Validate sender exists
+  const sender = await User.findById(decodedToken.userId);
+  if (!sender) {
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Sender does not exist");
+  }
+
+  const queryBuilder = new QueryBuilder(
+    Parcel.find({ sender: sender._id })
+      .populate("sender", "name phone")
+      .populate("receiver", "name phone")
+      .populate("parcelType", "parcelType"),
+    query
+  );
+
+  const parcels = await queryBuilder.filter().sort().fields().paginate();
+
+  const [data, meta] = await Promise.all([
+    parcels.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
+};
+
+const getMyIncomingParcels = async (
+  query: Record<string, string>,
+  decodedToken: JwtPayload
+) => {
+  // Validate receiver exists
+  const receiver = await User.findById(decodedToken.userId);
+  if (!receiver) {
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Receiver does not exist");
+  }
+  const queryBuilder = new QueryBuilder(
+    Parcel.find({ receiver: receiver._id })
+      .populate("sender", "name phone")
+      .populate("receiver", "name phone")
+      .populate("parcelType", "parcelType"),
+    query
+  );
+
+  const parcels = await queryBuilder.filter().sort().fields().paginate();
+
+  const [data, meta] = await Promise.all([
+    parcels.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
+};
+
 export const ParcelService = {
   createNewParcel,
+  getMySentParcels,
+  getMyIncomingParcels,
 };

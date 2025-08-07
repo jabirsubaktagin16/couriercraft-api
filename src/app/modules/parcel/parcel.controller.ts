@@ -22,6 +22,46 @@ const createNewParcel = catchAsync(
   }
 );
 
+const getMySentParcels = catchAsync(async (req: Request, res: Response) => {
+  const query = req.query;
+
+  const verifiedToken = req.user as JwtPayload;
+
+  const result = await ParcelService.getMySentParcels(
+    query as Record<string, string>,
+    verifiedToken
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: "My Sent Parcels retrieved successfully",
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
+const getMyIncomingParcels = catchAsync(async (req: Request, res: Response) => {
+  const query = req.query;
+
+  const verifiedToken = req.user as JwtPayload;
+
+  const result = await ParcelService.getMyIncomingParcels(
+    query as Record<string, string>,
+    verifiedToken
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: "My Incoming Parcels retrieved successfully",
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 export const ParcelController = {
   createNewParcel,
+  getMySentParcels,
+  getMyIncomingParcels,
 };

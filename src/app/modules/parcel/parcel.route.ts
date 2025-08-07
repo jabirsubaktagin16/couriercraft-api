@@ -14,4 +14,12 @@ router.post(
   ParcelController.createNewParcel
 );
 
+router.get("/sent/me", checkAuth(Role.USER), ParcelController.getMySentParcels);
+
+router.get(
+  "/received/me",
+  checkAuth(Role.USER),
+  ParcelController.getMyIncomingParcels
+);
+
 export const ParcelRoutes = router;
