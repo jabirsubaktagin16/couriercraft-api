@@ -60,8 +60,49 @@ const getMyIncomingParcels = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const trackParcel = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const trackingId = req.params.trackingId;
+
+    const verifiedToken = req.user as JwtPayload;
+
+    const parcel = await ParcelService.trackParcel(trackingId, verifiedToken);
+
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "Parcel Tracking Done successfully",
+      data: parcel,
+    });
+  }
+);
+
+const updateParcel = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const parcelId = req.params.id;
+
+    const verifiedToken = req.user as JwtPayload;
+    const payload = req.body;
+
+    const parcel = await ParcelService.updateParcel(
+      parcelId,
+      payload,
+      verifiedToken
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "Parcel updated successfully",
+      data: parcel,
+    });
+  }
+);
+
 export const ParcelController = {
   createNewParcel,
   getMySentParcels,
   getMyIncomingParcels,
+  updateParcel,
+  trackParcel,
 };

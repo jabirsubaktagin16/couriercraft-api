@@ -3,12 +3,15 @@ import { IAddress } from "../user/user.interface";
 
 export enum DeliveryStatus {
   PENDING = "PENDING",
+  PICKED_UP = "PICKED_UP",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
   IN_TRANSIT = "IN_TRANSIT",
+  OUT_FOR_DELIVERY = "OUT_FOR_DELIVERY",
+  DELIVERY_FAILED = "DELIVERY_FAILED",
+  REASSIGNED = "REASSIGNED",
   DELIVERED = "DELIVERED",
   CANCELLED = "CANCELLED",
-  RETURNED = "RETURNED",
-  REJECTED = "REJECTED",
-  OUT_FOR_DELIVERY = "OUT_FOR_DELIVERY",
 }
 
 export enum DeliveryPriority {

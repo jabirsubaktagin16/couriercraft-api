@@ -27,7 +27,7 @@ export const createParcelZodSchema = z.object({
   distance: z.number({ error: "Distance must be number" }).optional(),
 });
 
-export const updateZodSchema = z.object({
+export const updateParcelZodSchema = z.object({
   pickupHub: z.string({ error: "Pick Up Hub must be string" }).optional(),
   deliveryHub: z.string({ error: "Delivery Hub must be string" }).optional(),
   pickupRider: z.string({ error: "Pick Up Rider must be string" }).optional(),
