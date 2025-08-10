@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Parcel } from "./parcel.model";
 import httpStatusCodes from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { Types } from "mongoose";
@@ -16,6 +14,7 @@ import {
 } from "../user/user.interface";
 import { User } from "../user/user.model";
 import { DeliveryPriority, DeliveryStatus, IParcel } from "./parcel.interface";
+import { Parcel } from "./parcel.model";
 
 interface ICreateParcelRequest {
   receiver: Types.ObjectId;
@@ -333,36 +332,77 @@ const updateParcel = async (
     throw new AppError(httpStatusCodes.BAD_REQUEST, "Invalid status update");
   }
 
-  // ----- Rider assignment checks -----
+  // ---------- pickup rider validation & assignment ----------
   if (payload.pickupRider) {
     const pickupRiderInfo = await User.findById(payload.pickupRider);
+    if (!pickupRiderInfo || pickupRiderInfo.role !== Role.RIDER) {
+      throw new AppError(
+        httpStatusCodes.BAD_REQUEST,
+        "Pickup rider not found or not a rider"
+      );
+    }
+
+    // Hub match: prefer rider.riderProfile.assignedHubId, fallback to other shapes
+    const riderAssignedHubId = pickupRiderInfo.riderProfile?.assignedHub;
+
+    const parcelPickupHubId = parcel.pickupHub?.toString?.();
+
     if (
-      !pickupRiderInfo ||
-      pickupRiderInfo.role !== Role.RIDER ||
-      pickupRiderInfo.riderProfile?.assignedHub?.toString() !==
-        parcel.pickupHub!.toString()
+      !riderAssignedHubId ||
+      riderAssignedHubId.toString() !== parcelPickupHubId
     ) {
       throw new AppError(
         httpStatusCodes.BAD_REQUEST,
-        "Pickup rider must be from the pickup hub"
+        "Pickup rider must be assigned to the parcel's pickup hub"
       );
     }
+
+    // Availability check (must be AVAILABLE)
+    const riderStatus = pickupRiderInfo.riderProfile?.availabilityStatus;
+    if (riderStatus !== RiderAvailabilityStatus.AVAILABLE) {
+      throw new AppError(
+        httpStatusCodes.BAD_REQUEST,
+        "Pickup rider is not available for assignment"
+      );
+    }
+
     parcel.pickupRider = payload.pickupRider;
   }
 
+  // ---------- delivery rider validation & assignment ----------
   if (payload.deliveryRider) {
-    const deliveryRiderInfo = await User.findById(payload.deliveryRider);
+    const deliveryRider = await User.findById(payload.deliveryRider);
+    if (!deliveryRider || deliveryRider.role !== Role.RIDER) {
+      throw new AppError(
+        httpStatusCodes.BAD_REQUEST,
+        "Delivery rider not found or not a rider"
+      );
+    }
+
+    // Hub match: prefer rider.riderProfile.assignedHubId, fallback to other shapes
+    const riderAssignedDeliveryHubId = deliveryRider.riderProfile?.assignedHub;
+
+    const parcelDeliveryHubId = parcel.deliveryHub?.toString?.();
+
     if (
-      !deliveryRiderInfo ||
-      deliveryRiderInfo.role !== Role.RIDER ||
-      deliveryRiderInfo.riderProfile?.assignedHub?.toString() !==
-        parcel.deliveryHub!.toString()
+      !riderAssignedDeliveryHubId ||
+      riderAssignedDeliveryHubId.toString() !== parcelDeliveryHubId
     ) {
       throw new AppError(
         httpStatusCodes.BAD_REQUEST,
-        "Delivery rider must be from the delivery hub"
+        "Delivery rider must be assigned to the parcel's delivery hub"
       );
     }
+
+    // Availability check (must be AVAILABLE)
+    const deliveryRiderStatus = deliveryRider.riderProfile?.availabilityStatus;
+    if (deliveryRiderStatus !== RiderAvailabilityStatus.AVAILABLE) {
+      throw new AppError(
+        httpStatusCodes.BAD_REQUEST,
+        "Delivery rider is not available for assignment"
+      );
+    }
+
     parcel.deliveryRider = payload.deliveryRider;
   }
 

@@ -113,7 +113,7 @@ const addNewAddress = async (
 
   await user.save();
 
-  return userInfoReturn(user);
+  return userInfoReturn(user.toObject());
 };
 
 const getAllUsers = async (query: Record<string, string>) => {
@@ -216,7 +216,7 @@ const updateUser = async (
     runValidators: true,
   });
 
-  return newUpdatedUser;
+  return userInfoReturn(newUpdatedUser!.toObject());
 };
 
 export const UserService = {
