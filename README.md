@@ -535,17 +535,40 @@ _API Endpoint (Method):_ `/api/v1/hub/create` (POST)
 _Request:_
 
 ```
-
-
-
+{
+	"name":  "Mohammadpur Hub",
+	"location":  "Mohammadpur",
+	"contactNumber":  "+8801766006600",
+	"coveredArea":  [
+		"Mohammadpur",
+		"Adabor",
+		"Shyamoli",
+		"Kallyanpur"
+	]
+}
 ```
 
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 201,
+    "success": true,
+    "message": "Hub created",
+    "data": {
+        "name": "Mohammadpur Hub",
+        "location": "Mohammadpur",
+        "contactNumber": "+8801766006600",
+        "coveredArea": [
+            "Mohammadpur",
+            "Adabor",
+            "Shyamoli",
+            "Kallyanpur"
+        ],
+        "_id": "6899400da55c2ce42df64255",
+        "__v": 0
+    }
+}
 ```
 
 **2. Get All Hubs:** All created hubs can be retrieved by admin and super admin.
@@ -555,9 +578,100 @@ _API Endpoint (Method):_ `/api/v1/hub/list` (GET)
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "Hubs retrieved successfully",
+    "data": [
+        {
+            "_id": "6891f50d38d4942538b8e3b6",
+            "name": "Banani Hub",
+            "location": "Banani",
+            "contactNumber": "+8801711001100",
+            "coveredArea": [
+                "Banani",
+                "Gulshan 1",
+                "Gulshan 2",
+                "Niketan"
+            ],
+            "__v": 0
+        },
+        {
+            "_id": "6891f54b38d4942538b8e3b9",
+            "name": "Dhanmondi Hub",
+            "location": "Dhanmondi",
+            "contactNumber": "+8801722002200",
+            "coveredArea": [
+                "Dhanmondi",
+                "Kalabagan",
+                "Elephant Road",
+                "New Market"
+            ],
+            "__v": 0
+        },
+        {
+            "_id": "6891f55838d4942538b8e3bc",
+            "name": "Uttara Hub",
+            "location": "Uttara Sector 7",
+            "contactNumber": "+8801733003300",
+            "coveredArea": [
+                "Uttara Sector 3",
+                "Sector 5",
+                "Sector 7",
+                "Sector 13",
+                "Azampur"
+            ],
+            "__v": 0
+        },
+        {
+            "_id": "6891f56a38d4942538b8e3bf",
+            "name": "Mirpur Hub",
+            "location": "Mirpur 10",
+            "contactNumber": "+8801744004400",
+            "coveredArea": [
+                "Mirpur 1",
+                "Mirpur 2",
+                "Mirpur 10",
+                "Kazipara",
+                "Shewrapara"
+            ],
+            "__v": 0
+        },
+        {
+            "_id": "6891f58038d4942538b8e3c3",
+            "name": "Motijheel Hub",
+            "location": "Shapla Chattar",
+            "contactNumber": "+8801755005500",
+            "coveredArea": [
+                "Motijheel",
+                "Dilkusha",
+                "Paltan",
+                "Shapla Chattar",
+                "Arambagh"
+            ],
+            "__v": 0
+        },
+        {
+            "_id": "6899400da55c2ce42df64255",
+            "name": "Mohammadpur Hub",
+            "location": "Mohammadpur",
+            "contactNumber": "+8801766006600",
+            "coveredArea": [
+                "Mohammadpur",
+                "Adabor",
+                "Shyamoli",
+                "Kallyanpur"
+            ],
+            "__v": 0
+        }
+    ],
+    "meta": {
+        "page": 1,
+        "limit": 10,
+        "total": 6,
+        "totalPage": 1
+    }
+}
 ```
 
 **3. Update Hub:** Existing hub can be updated by admin/super admin.
@@ -567,17 +681,32 @@ _API Endpoint (Method):_ `/api/v1/hub/update/:id` (PATCH)
 _Request:_
 
 ```
-
-
-
+{
+	"location":  "Tajmahal Road"
+}
 ```
 
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "Hub updated successfully",
+    "data": {
+        "_id": "6899400da55c2ce42df64255",
+        "name": "Mohammadpur Hub",
+        "location": "Tajmahal Road",
+        "contactNumber": "+8801766006600",
+        "coveredArea": [
+            "Mohammadpur",
+            "Adabor",
+            "Shyamoli",
+            "Kallyanpur"
+        ],
+        "__v": 0
+    }
+}
 ```
 
 **4. Find Riders by Hub:** Admin/Super Admin can view all riders that are specifically assigned to one hub.
@@ -587,9 +716,52 @@ _API Endpoint (Method):_ `/api/v1/hub/riders/:id` (GET)
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "Riders retrieved successfully",
+    "data": {
+        "hub": {
+            "_id": "6891f54b38d4942538b8e3b9",
+            "name": "Dhanmondi Hub",
+            "location": "Dhanmondi",
+            "contactNumber": "+8801722002200",
+            "coveredArea": [
+                "Dhanmondi",
+                "Kalabagan",
+                "Elephant Road",
+                "New Market"
+            ],
+            "__v": 0
+        },
+        "riders": [
+            {
+                "_id": "68920b68e708828db90ece17",
+                "name": "Polash",
+                "email": "polash@gmail.com",
+                "role": "RIDER",
+                "auths": [
+                    {
+                        "provider": "credentials",
+                        "providerId": "polash@gmail.com"
+                    }
+                ],
+                "address": [],
+                "createdAt": "2025-08-05T13:47:20.114Z",
+                "updatedAt": "2025-08-05T13:52:35.353Z",
+                "phone": "+8801700000004",
+                "riderProfile": {
+                    "vehicleType": "Motorbike",
+                    "vehicleNumber": "DHAKA-METRO-LA-9999",
+                    "licenseNumber": "DL1111222233",
+                    "assignedHub": "6891f54b38d4942538b8e3b9",
+                    "availabilityStatus": "Available",
+                    "_id": "68920ca3e708828db90ece28"
+                }
+            }
+        ]
+    }
+}
 ```
 
 ### Fee Config
@@ -601,17 +773,29 @@ _API Endpoint (Method):_ `/api/v1/fee-config/create` (POST)
 _Request:_
 
 ```
-
-
-
+{
+	"parcelType":  "OTHER",
+	"feeType":  "FIXED",
+	"baseFee":  40
+}
 ```
 
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 201,
+    "success": true,
+    "message": "Fee Config created",
+    "data": {
+        "parcelType": "OTHER",
+        "feeType": "FIXED",
+        "baseFee": 40,
+        "_id": "68994673a55c2ce42df64260",
+        "createdAt": "2025-08-11T01:25:07.638Z",
+        "updatedAt": "2025-08-11T01:25:07.638Z"
+    }
+}
 ```
 
 **2. Get All Fee Configs:** All created fee-configs can be retrieved by admin and super admin.
@@ -621,9 +805,53 @@ _API Endpoint (Method):_ `/api/v1/fee-config/list` (GET)
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "Fee Configs retrieved successfully",
+    "data": [
+        {
+            "_id": "68994673a55c2ce42df64260",
+            "parcelType": "OTHER",
+            "feeType": "FIXED",
+            "baseFee": 40,
+            "createdAt": "2025-08-11T01:25:07.638Z",
+            "updatedAt": "2025-08-11T01:25:07.638Z"
+        },
+        {
+            "_id": "6892404accd75063bc8317a3",
+            "parcelType": "PACKAGE",
+            "feeType": "WEIGHT_BASED",
+            "baseFee": 40,
+            "weightRate": 20,
+            "createdAt": "2025-08-05T17:32:58.257Z",
+            "updatedAt": "2025-08-05T17:32:58.257Z"
+        },
+        {
+            "_id": "68924025ccd75063bc83179f",
+            "parcelType": "FRAGILE",
+            "feeType": "WEIGHT_BASED",
+            "baseFee": 60,
+            "weightRate": 30,
+            "createdAt": "2025-08-05T17:32:21.992Z",
+            "updatedAt": "2025-08-05T17:32:21.992Z"
+        },
+        {
+            "_id": "68923fddccd75063bc83179b",
+            "parcelType": "DOCUMENT",
+            "feeType": "FIXED",
+            "baseFee": 50,
+            "createdAt": "2025-08-05T17:31:09.216Z",
+            "updatedAt": "2025-08-05T17:31:09.216Z"
+        }
+    ],
+    "meta": {
+        "page": 1,
+        "limit": 10,
+        "total": 4,
+        "totalPage": 1
+    }
+}
 ```
 
 ### Parcel

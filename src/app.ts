@@ -28,7 +28,7 @@ app.use(cors());
 app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
-  res.status(200).json({ message: "Welcome to Tour Management System" });
+  res.status(200).json({ message: "Welcome to Courier Craft" });
 });
 
 app.use(globalErrorHandler);
