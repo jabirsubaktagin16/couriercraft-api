@@ -15,6 +15,7 @@ import {
 import { User } from "../user/user.model";
 import { DeliveryPriority, DeliveryStatus, IParcel } from "./parcel.interface";
 import { Parcel } from "./parcel.model";
+import { Hub } from "../hub/hub.model";
 
 interface ICreateParcelRequest {
   receiver: Types.ObjectId;
@@ -23,7 +24,7 @@ interface ICreateParcelRequest {
   pickupAddress?: IAddress;
   deliveryAddressId?: Types.ObjectId;
   deliveryAddress?: IAddress;
-  parcelType?: ParcelType;
+  parcelType: ParcelType;
   weight?: number | 0;
   distance?: number;
 }
@@ -225,15 +226,17 @@ const getMyIncomingParcels = async (
 };
 
 const trackParcel = async (trackingId: string, decodedToken: JwtPayload) => {
-  const parcel = await Parcel.findOne({ trackingId: trackingId });
+  const parcel = await Parcel.findOne({ trackingId: trackingId })
+    .populate("sender", "name phone")
+    .populate("receiver", "name phone");
   if (!parcel)
     throw new AppError(httpStatusCodes.NOT_FOUND, "Parcel not found");
 
   // If role is User but not in the Receiver or Sender
   if (
     decodedToken.role === Role.USER &&
-    decodedToken.userId !== parcel.sender.toString() &&
-    decodedToken.userId !== parcel.receiver.toString()
+    decodedToken.userId !== parcel.sender._id.toString() &&
+    decodedToken.userId !== parcel.receiver._id.toString()
   ) {
     throw new AppError(httpStatusCodes.UNAUTHORIZED, "You are not authorized");
   }
@@ -253,12 +256,7 @@ const updateParcel = async (
   payload: Partial<IParcel>,
   decodedToken: JwtPayload
 ) => {
-  const parcel = await Parcel.findById(parcelId)
-    .populate("pickupHub")
-    .populate("deliveryHub")
-    .populate("pickupRider")
-    .populate("deliveryRider");
-
+  const parcel = await Parcel.findById(parcelId);
   if (!parcel)
     throw new AppError(httpStatusCodes.NOT_FOUND, "Parcel not found");
 
@@ -287,7 +285,10 @@ const updateParcel = async (
       DeliveryStatus.APPROVED,
     ].includes(payload.status!)
   ) {
-    if (decodedToken.role !== Role.ADMIN) {
+    if (
+      decodedToken.role !== Role.ADMIN &&
+      decodedToken.role !== Role.SUPER_ADMIN
+    ) {
       throw new AppError(
         httpStatusCodes.FORBIDDEN,
         "Only admin can approve/reject/cancel"
@@ -332,6 +333,46 @@ const updateParcel = async (
     throw new AppError(httpStatusCodes.BAD_REQUEST, "Invalid status update");
   }
 
+  // Pickup Hub Validation
+  if (payload.pickupHub) {
+    const hub = await Hub.findById(payload.pickupHub);
+    if (!hub) {
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "Pickup hub not found");
+    } else {
+      if (
+        decodedToken.role !== Role.ADMIN &&
+        decodedToken.role !== Role.SUPER_ADMIN
+      ) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "You can not assign pickup hub"
+        );
+      } else {
+        parcel.pickupHub = payload.pickupHub;
+      }
+    }
+  }
+
+  // Delivery Hub Validation
+  if (payload.deliveryHub) {
+    const hub = await Hub.findById(payload.deliveryHub);
+    if (!hub) {
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "Delivery hub not found");
+    } else {
+      if (
+        decodedToken.role !== Role.ADMIN &&
+        decodedToken.role !== Role.SUPER_ADMIN
+      ) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "You can not assign delivery hub"
+        );
+      } else {
+        parcel.deliveryHub = payload.deliveryHub;
+      }
+    }
+  }
+
   // ---------- pickup rider validation & assignment ----------
   if (payload.pickupRider) {
     const pickupRiderInfo = await User.findById(payload.pickupRider);
@@ -345,7 +386,7 @@ const updateParcel = async (
     // Hub match: prefer rider.riderProfile.assignedHubId, fallback to other shapes
     const riderAssignedHubId = pickupRiderInfo.riderProfile?.assignedHub;
 
-    const parcelPickupHubId = parcel.pickupHub?.toString?.();
+    const parcelPickupHubId = payload.pickupHub?.toString?.();
 
     if (
       !riderAssignedHubId ||
@@ -382,7 +423,7 @@ const updateParcel = async (
     // Hub match: prefer rider.riderProfile.assignedHubId, fallback to other shapes
     const riderAssignedDeliveryHubId = deliveryRider.riderProfile?.assignedHub;
 
-    const parcelDeliveryHubId = parcel.deliveryHub?.toString?.();
+    const parcelDeliveryHubId = payload.deliveryHub?.toString?.();
 
     if (
       !riderAssignedDeliveryHubId ||

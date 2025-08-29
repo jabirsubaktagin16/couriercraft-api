@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { ParcelType } from "../feeConfig/feeConfig.interface";
+
 import { IAddress } from "../user/user.interface";
 import { DeliveryPriority, DeliveryStatus, IParcel } from "./parcel.interface";
 
@@ -93,8 +93,6 @@ const parcelSchema = new Schema<IParcel>(
     parcelType: {
       type: Schema.Types.ObjectId,
       ref: "FeeConfig",
-      required: true,
-      default: ParcelType.PACKAGE,
     },
     weight: {
       type: Number,

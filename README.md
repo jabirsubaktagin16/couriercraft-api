@@ -865,17 +865,60 @@ _API Endpoint (Method):_ `/api/v1/parcel/create` (POST)
 _Request:_
 
 ```
-
-
-
+{
+    "receiver": "6891844aee059586287c9da8",
+    "pickUpAddressId": "6898c75ad5045fc0b6ee7fab",
+    "deliveryAddressId": "6891a64aa1ae81b46dbca3f9",
+    "parcelType": "PACKAGE",
+    "weight": 2
+}
 ```
 
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 201,
+    "success": true,
+    "message": "Parcel requested successfully",
+    "data": {
+        "trackingId": "TRK-20250826-070566",
+        "sender": "6898c551cf322702b2c41f69",
+        "receiver": "6891844aee059586287c9da8",
+        "priority": "NORMAL",
+        "pickupAddress": {
+            "addressLine": "Mouchak Market",
+            "area": "Malibagh",
+            "city": "Dhaka",
+            "postalCode": "1216",
+            "country": "Bangladesh",
+            "_id": "6898c75ad5045fc0b6ee7fab"
+        },
+        "deliveryAddress": {
+            "addressLine": "36/6 Gopibagh",
+            "area": "Motijheel",
+            "city": "Dhaka",
+            "postalCode": "1000",
+            "country": "Bangladesh",
+            "_id": "6891a64aa1ae81b46dbca3f9"
+        },
+        "parcelType": "6892404accd75063bc8317a3",
+        "weight": 2,
+        "deliveryFee": 80,
+        "status": "PENDING",
+        "trackingLogs": [
+            {
+                "status": "PENDING",
+                "updatedBy": "6898c551cf322702b2c41f69",
+                "description": "Parcel created and waiting for pickup",
+                "timestamp": "2025-08-26T16:03:31.812Z"
+            }
+        ],
+        "_id": "68addad327cccbdd644f7da2",
+        "createdAt": "2025-08-26T16:03:31.819Z",
+        "updatedAt": "2025-08-26T16:03:31.819Z"
+    }
+}
 ```
 
 **2. Track a Parcel:** A Parcel can be tracked by the Sender and Receiver using Tracking ID. Any user other than the sender or receiver of the parcel or Admin or Super Admin or Assigned Riders can not access the data.
@@ -885,9 +928,56 @@ _API Endpoint (Method):_ `/api/v1/parcel/track/:trackingId` (GET)
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "Parcel Tracking Done successfully",
+    "data": {
+        "_id": "68addad327cccbdd644f7da2",
+        "trackingId": "TRK-20250826-070566",
+        "sender": {
+            "_id": "6898c551cf322702b2c41f69",
+            "name": "Khaled Ahmed",
+            "phone": "+8801900000001"
+        },
+        "receiver": {
+            "_id": "6891844aee059586287c9da8",
+            "name": "Jawad",
+            "phone": "+8801700000002"
+        },
+        "priority": "NORMAL",
+        "pickupAddress": {
+            "addressLine": "Mouchak Market",
+            "area": "Malibagh",
+            "city": "Dhaka",
+            "postalCode": "1216",
+            "country": "Bangladesh",
+            "_id": "6898c75ad5045fc0b6ee7fab"
+        },
+        "deliveryAddress": {
+            "addressLine": "36/6 Gopibagh",
+            "area": "Motijheel",
+            "city": "Dhaka",
+            "postalCode": "1000",
+            "country": "Bangladesh",
+            "_id": "6891a64aa1ae81b46dbca3f9"
+        },
+        "parcelType": "6892404accd75063bc8317a3",
+        "weight": 2,
+        "deliveryFee": 80,
+        "status": "PENDING",
+        "trackingLogs": [
+            {
+                "status": "PENDING",
+                "updatedBy": "6898c551cf322702b2c41f69",
+                "description": "Parcel created and waiting for pickup",
+                "timestamp": "2025-08-26T16:03:31.812Z"
+            }
+        ],
+        "createdAt": "2025-08-26T16:03:31.819Z",
+        "updatedAt": "2025-08-26T16:03:31.819Z"
+    }
+}
 ```
 
 **3. View My Sent Parcels:** User can view all the parcels they have sent.
@@ -897,9 +987,67 @@ _API Endpoint (Method):_ `/api/v1/parcel/sent/me` (GET)
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "My Sent Parcels retrieved successfully",
+    "data": [
+        {
+            "_id": "68addad327cccbdd644f7da2",
+            "trackingId": "TRK-20250826-070566",
+            "sender": {
+                "_id": "6898c551cf322702b2c41f69",
+                "name": "Khaled Ahmed",
+                "phone": "+8801900000001"
+            },
+            "receiver": {
+                "_id": "6891844aee059586287c9da8",
+                "name": "Jawad",
+                "phone": "+8801700000002"
+            },
+            "priority": "NORMAL",
+            "pickupAddress": {
+                "addressLine": "Mouchak Market",
+                "area": "Malibagh",
+                "city": "Dhaka",
+                "postalCode": "1216",
+                "country": "Bangladesh",
+                "_id": "6898c75ad5045fc0b6ee7fab"
+            },
+            "deliveryAddress": {
+                "addressLine": "36/6 Gopibagh",
+                "area": "Motijheel",
+                "city": "Dhaka",
+                "postalCode": "1000",
+                "country": "Bangladesh",
+                "_id": "6891a64aa1ae81b46dbca3f9"
+            },
+            "parcelType": {
+                "_id": "6892404accd75063bc8317a3",
+                "parcelType": "PACKAGE"
+            },
+            "weight": 2,
+            "deliveryFee": 80,
+            "status": "PENDING",
+            "trackingLogs": [
+                {
+                    "status": "PENDING",
+                    "updatedBy": "6898c551cf322702b2c41f69",
+                    "description": "Parcel created and waiting for pickup",
+                    "timestamp": "2025-08-26T16:03:31.812Z"
+                }
+            ],
+            "createdAt": "2025-08-26T16:03:31.819Z",
+            "updatedAt": "2025-08-26T16:03:31.819Z"
+        }
+    ],
+    "meta": {
+        "page": 1,
+        "limit": 10,
+        "total": 2,
+        "totalPage": 1
+    }
+}
 ```
 
 **4. View My Received Parcels:** User can view all the parcels they have received or going to receive.
@@ -927,15 +1075,67 @@ _API Endpoint (Method)_: `/api/v1/parcel/update/:id` (PATCH)
 _Request:_
 
 ```
-
-
-
+{
+    "status": "APPROVED",
+    "pickupHub": "6891f54b38d4942538b8e3b9",
+    "deliveryHub": "6891f58038d4942538b8e3c3",
+    "pickupRider": "68920b68e708828db90ece17",
+    "deliveryRider": "68920b72e708828db90ece19"
+}
 ```
 
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "Parcel updated successfully",
+    "data": {
+        "_id": "68addad327cccbdd644f7da2",
+        "trackingId": "TRK-20250826-070566",
+        "sender": "6898c551cf322702b2c41f69",
+        "receiver": "6891844aee059586287c9da8",
+        "priority": "NORMAL",
+        "pickupAddress": {
+            "addressLine": "Mouchak Market",
+            "area": "Malibagh",
+            "city": "Dhaka",
+            "postalCode": "1216",
+            "country": "Bangladesh",
+            "_id": "6898c75ad5045fc0b6ee7fab"
+        },
+        "deliveryAddress": {
+            "addressLine": "36/6 Gopibagh",
+            "area": "Motijheel",
+            "city": "Dhaka",
+            "postalCode": "1000",
+            "country": "Bangladesh",
+            "_id": "6891a64aa1ae81b46dbca3f9"
+        },
+        "parcelType": "6892404accd75063bc8317a3",
+        "weight": 2,
+        "deliveryFee": 80,
+        "status": "APPROVED",
+        "trackingLogs": [
+            {
+                "status": "PENDING",
+                "updatedBy": "6898c551cf322702b2c41f69",
+                "description": "Parcel created and waiting for pickup",
+                "timestamp": "2025-08-26T16:03:31.812Z"
+            },
+            {
+                "status": "APPROVED",
+                "updatedBy": "68918288a93a0a7a2cd6e5c5",
+                "timestamp": "2025-08-27T15:55:58.986Z"
+            }
+        ],
+        "createdAt": "2025-08-26T16:03:31.819Z",
+        "updatedAt": "2025-08-27T15:55:58.994Z",
+        "pickupHub": "6891f54b38d4942538b8e3b9",
+        "deliveryHub": "6891f58038d4942538b8e3c3",
+        "pickupRider": "68920b68e708828db90ece17",
+        "deliveryRider": "68920b72e708828db90ece19"
+    }
+}
 ```
