@@ -60,6 +60,44 @@ const getMyIncomingParcels = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getMyPickupParcels = catchAsync(async (req: Request, res: Response) => {
+  const query = req.query;
+
+  const verifiedToken = req.user as JwtPayload;
+
+  const result = await ParcelService.getMyPickupParcels(
+    query as Record<string, string>,
+    verifiedToken
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: "My Pickup Parcels retrieved successfully",
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
+const getMyDeliveryParcels = catchAsync(async (req: Request, res: Response) => {
+  const query = req.query;
+
+  const verifiedToken = req.user as JwtPayload;
+
+  const result = await ParcelService.getMyDeliveryParcels(
+    query as Record<string, string>,
+    verifiedToken
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: "My Delivery Parcels retrieved successfully",
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 const trackParcel = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const trackingId = req.params.trackingId;
@@ -103,6 +141,8 @@ export const ParcelController = {
   createNewParcel,
   getMySentParcels,
   getMyIncomingParcels,
+  getMyPickupParcels,
+  getMyDeliveryParcels,
   updateParcel,
   trackParcel,
 };

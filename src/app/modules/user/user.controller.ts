@@ -64,9 +64,26 @@ const updateUser = catchAsync(
   }
 );
 
+const updateRiderStatus = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const verifiedToken = req.user as JwtPayload;
+    const payload = req.body;
+
+    const parcels = await UserService.updateRiderStatus(verifiedToken, payload);
+
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: `Rider ${payload.status} parcels updated successfully`,
+      data: parcels,
+    });
+  }
+);
+
 export const UserController = {
   createUser,
   getAllUsers,
   updateUser,
   addNewAddress,
+  updateRiderStatus,
 };

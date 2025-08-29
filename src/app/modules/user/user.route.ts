@@ -22,6 +22,12 @@ router.get(
 router.post("/addresses", checkAuth(Role.USER), UserController.addNewAddress);
 
 router.patch(
+  "/rider/status",
+  checkAuth(Role.RIDER),
+  UserController.updateRiderStatus
+);
+
+router.patch(
   "/:id",
   checkAuth(...Object.values(Role)),
   validateRequest(updateUserZodSchema),

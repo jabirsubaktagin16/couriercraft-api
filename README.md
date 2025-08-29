@@ -428,6 +428,76 @@ _Response:_
 }
 ```
 
+**5. Update Rider Availability Status:** A rider can update their availability status when they go out for delivery or pickup. By this parcels will be updated as well in bulk.
+
+_API Endpoint (Method):_ `/api/v1/user/rider/status` (PATCH)
+
+_Request:_
+
+```
+{
+    "status": "pickup"
+}
+```
+
+_Response:_
+
+```
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "Rider pickup parcels updated successfully",
+    "data": [
+        {
+            "_id": "68addad327cccbdd644f7da2",
+            "trackingId": "TRK-20250826-070566",
+            "sender": "6898c551cf322702b2c41f69",
+            "receiver": "6891844aee059586287c9da8",
+            "priority": "NORMAL",
+            "pickupAddress": {
+                "addressLine": "Mouchak Market",
+                "area": "Malibagh",
+                "city": "Dhaka",
+                "postalCode": "1216",
+                "country": "Bangladesh",
+                "_id": "6898c75ad5045fc0b6ee7fab"
+            },
+            "deliveryAddress": {
+                "addressLine": "36/6 Gopibagh",
+                "area": "Motijheel",
+                "city": "Dhaka",
+                "postalCode": "1000",
+                "country": "Bangladesh",
+                "_id": "6891a64aa1ae81b46dbca3f9"
+            },
+            "parcelType": "6892404accd75063bc8317a3",
+            "weight": 2,
+            "deliveryFee": 80,
+            "status": "APPROVED",
+            "trackingLogs": [
+                {
+                    "status": "PENDING",
+                    "updatedBy": "6898c551cf322702b2c41f69",
+                    "description": "Parcel created and waiting for pickup",
+                    "timestamp": "2025-08-26T16:03:31.812Z"
+                },
+                {
+                    "status": "APPROVED",
+                    "updatedBy": "68918288a93a0a7a2cd6e5c5",
+                    "timestamp": "2025-08-27T15:55:58.986Z"
+                }
+            ],
+            "createdAt": "2025-08-26T16:03:31.819Z",
+            "updatedAt": "2025-08-29T13:35:44.502Z",
+            "deliveryHub": "6891f58038d4942538b8e3c3",
+            "deliveryRider": "68920b72e708828db90ece19",
+            "pickupHub": "6891f54b38d4942538b8e3b9",
+            "pickupRider": "68920b68e708828db90ece17"
+        }
+    ]
+}
+```
+
 ### Auth
 
 **1. User Login:** User will login using email and password
@@ -1057,12 +1127,206 @@ _API Endpoint (Method):_ `/api/v1/parcel/received/me` (GET)
 _Response:_
 
 ```
-
-
-
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "My Incoming Parcels retrieved successfully",
+    "data": [
+        {
+            "_id": "68addad327cccbdd644f7da2",
+            "trackingId": "TRK-20250826-070566",
+            "sender": {
+                "_id": "6898c551cf322702b2c41f69",
+                "name": "Khaled Ahmed",
+                "phone": "+8801900000001"
+            },
+            "receiver": {
+                "_id": "6891844aee059586287c9da8",
+                "name": "Jawad",
+                "phone": "+8801700000002"
+            },
+            "priority": "NORMAL",
+            "pickupAddress": {
+                "addressLine": "Mouchak Market",
+                "area": "Malibagh",
+                "city": "Dhaka",
+                "postalCode": "1216",
+                "country": "Bangladesh",
+                "_id": "6898c75ad5045fc0b6ee7fab"
+            },
+            "deliveryAddress": {
+                "addressLine": "36/6 Gopibagh",
+                "area": "Motijheel",
+                "city": "Dhaka",
+                "postalCode": "1000",
+                "country": "Bangladesh",
+                "_id": "6891a64aa1ae81b46dbca3f9"
+            },
+            "parcelType": {
+                "_id": "6892404accd75063bc8317a3",
+                "parcelType": "PACKAGE"
+            },
+            "weight": 2,
+            "deliveryFee": 80,
+            "status": "APPROVED",
+            "trackingLogs": [
+                {
+                    "status": "PENDING",
+                    "updatedBy": "6898c551cf322702b2c41f69",
+                    "description": "Parcel created and waiting for pickup",
+                    "timestamp": "2025-08-26T16:03:31.812Z"
+                },
+                {
+                    "status": "APPROVED",
+                    "updatedBy": "68918288a93a0a7a2cd6e5c5",
+                    "timestamp": "2025-08-27T15:55:58.986Z"
+                }
+            ],
+            "createdAt": "2025-08-26T16:03:31.819Z",
+            "updatedAt": "2025-08-27T15:55:58.994Z",
+            "deliveryHub": "6891f58038d4942538b8e3c3",
+            "deliveryRider": "68920b72e708828db90ece19",
+            "pickupHub": "6891f54b38d4942538b8e3b9",
+            "pickupRider": "68920b68e708828db90ece17"
+        },
+        {
+            "_id": "68938f55ad08deaaba65eb88",
+            "trackingId": "TRK-20250806-856297",
+            "sender": {
+                "_id": "6891a7fd51adf1d9255dab3b",
+                "name": "Ahmad Subaktagin Jabir",
+                "phone": "+8801700000001"
+            },
+            "receiver": {
+                "_id": "6891844aee059586287c9da8",
+                "name": "Jawad",
+                "phone": "+8801700000002"
+            },
+            "priority": "NORMAL",
+            "pickupAddress": {
+                "addressLine": "Nandon Apartment Complex",
+                "area": "Mirpur",
+                "city": "Dhaka",
+                "postalCode": "1206",
+                "country": "Bangladesh",
+                "_id": "6891a9081bc2cb1c5175afbc"
+            },
+            "deliveryAddress": {
+                "addressLine": "36/6 Gopibagh",
+                "area": "Motijheel",
+                "city": "Dhaka",
+                "postalCode": "1000",
+                "country": "Bangladesh",
+                "_id": "6891a64aa1ae81b46dbca3f9"
+            },
+            "parcelType": {
+                "_id": "6892404accd75063bc8317a3",
+                "parcelType": "PACKAGE"
+            },
+            "weight": 2,
+            "deliveryFee": 80,
+            "status": "CANCELLED",
+            "trackingLogs": [
+                {
+                    "status": "PENDING",
+                    "updatedBy": "6891a7fd51adf1d9255dab3b",
+                    "description": "Parcel created and waiting for pickup",
+                    "timestamp": "2025-08-06T17:22:29.867Z"
+                }
+            ],
+            "createdAt": "2025-08-06T17:22:29.877Z",
+            "updatedAt": "2025-08-08T16:43:20.595Z"
+        }
+    ],
+    "meta": {
+        "page": 1,
+        "limit": 10,
+        "total": 2,
+        "totalPage": 1
+    }
+}
 ```
 
-**5. Update Parcel:** The core component of the parcel service is based here. It includes a number of role-based logics to correctly handle the package delivery service. Following are the logics that are used here:
+**5. View My Pickup Parcels (Rider):** A rider can view all the parcels he/she have to pickup from sender.
+
+_API Endpoint (Method):_ `/api/v1/parcel/rider/pickup/me` (GET)
+
+_Response:_
+
+```
+{
+    "statusCode": 200,
+    "success": true,
+    "message": "My Pickup Parcels retrieved successfully",
+    "data": [
+        {
+            "_id": "68addad327cccbdd644f7da2",
+            "trackingId": "TRK-20250826-070566",
+            "sender": {
+                "_id": "6898c551cf322702b2c41f69",
+                "name": "Khaled Ahmed",
+                "phone": "+8801900000001"
+            },
+            "receiver": {
+                "_id": "6891844aee059586287c9da8",
+                "name": "Jawad",
+                "phone": "+8801700000002"
+            },
+            "priority": "NORMAL",
+            "pickupAddress": {
+                "addressLine": "Mouchak Market",
+                "area": "Malibagh",
+                "city": "Dhaka",
+                "postalCode": "1216",
+                "country": "Bangladesh",
+                "_id": "6898c75ad5045fc0b6ee7fab"
+            },
+            "deliveryAddress": {
+                "addressLine": "36/6 Gopibagh",
+                "area": "Motijheel",
+                "city": "Dhaka",
+                "postalCode": "1000",
+                "country": "Bangladesh",
+                "_id": "6891a64aa1ae81b46dbca3f9"
+            },
+            "parcelType": {
+                "_id": "6892404accd75063bc8317a3",
+                "parcelType": "PACKAGE"
+            },
+            "weight": 2,
+            "deliveryFee": 80,
+            "status": "APPROVED",
+            "trackingLogs": [
+                {
+                    "status": "PENDING",
+                    "updatedBy": "6898c551cf322702b2c41f69",
+                    "description": "Parcel created and waiting for pickup",
+                    "timestamp": "2025-08-26T16:03:31.812Z"
+                },
+                {
+                    "status": "APPROVED",
+                    "updatedBy": "68918288a93a0a7a2cd6e5c5",
+                    "timestamp": "2025-08-27T15:55:58.986Z"
+                }
+            ],
+            "createdAt": "2025-08-26T16:03:31.819Z",
+            "updatedAt": "2025-08-27T15:55:58.994Z",
+            "deliveryHub": "6891f58038d4942538b8e3c3",
+            "deliveryRider": "68920b72e708828db90ece19",
+            "pickupHub": "6891f54b38d4942538b8e3b9",
+            "pickupRider": "68920b68e708828db90ece17"
+        }
+    ],
+    "meta": {
+        "page": 1,
+        "limit": 10,
+        "total": 2,
+        "totalPage": 1
+    }
+}
+```
+
+**7. Update Parcel:** The core component of the parcel service is based here. It includes a number of role-based logics to correctly handle the package delivery service. Following are the logics that are used here:
 
 - **User:** Sender can Cancel a request if the Parcel sending request is `PENDING`. Otherwise, user can not cancel the request
 

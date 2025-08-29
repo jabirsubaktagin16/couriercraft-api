@@ -2,7 +2,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import httpStatusCodes from "http-status-codes";
 import bcryptjs from "bcryptjs";
-import { IAddress, IAuthProvider, IUser, Role } from "./user.interface";
+import {
+  IAddress,
+  IAuthProvider,
+  IUser,
+  RiderAvailabilityStatus,
+  Role,
+} from "./user.interface";
 import { User } from "./user.model";
 import { envVars } from "../../config/env";
 import { QueryBuilder } from "../../utils/QueryBuilder";
@@ -11,9 +17,15 @@ import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../errorHelpers/AppError";
 import { Types } from "mongoose";
 import { userInfoReturn } from "../../utils/utilFunction";
+import { DeliveryStatus } from "../parcel/parcel.interface";
+import { Parcel } from "../parcel/parcel.model";
 
 interface AddressPayload {
   address?: IAddress | IAddress[];
+}
+
+interface RiderStatus {
+  status: "pickup" | "delivery";
 }
 
 const createUser = async (payload: Partial<IUser>) => {
@@ -219,9 +231,58 @@ const updateUser = async (
   return userInfoReturn(newUpdatedUser!.toObject());
 };
 
+const updateRiderStatus = async (
+  decodedToken: JwtPayload,
+  actionType: RiderStatus
+) => {
+  // Determine which parcels to update
+  let filter = {};
+  if (actionType.status === "pickup") {
+    filter = {
+      pickupRider: decodedToken.userId,
+      status: DeliveryStatus.APPROVED,
+    };
+  } else if (actionType.status === "delivery") {
+    filter = {
+      deliveryRider: decodedToken.userId,
+      status: DeliveryStatus.IN_TRANSIT, // ready for delivery
+    };
+  } else {
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Invalid bulk action type");
+  }
+
+  const parcels = await Parcel.find(filter);
+  if (!parcels.length) {
+    throw new AppError(
+      httpStatusCodes.NOT_FOUND,
+      "No parcels found for update"
+    );
+  }
+
+  // Update parcels and rider status
+  let updateStatus;
+  if (actionType.status === "pickup") {
+    updateStatus = DeliveryStatus.IN_TRANSIT;
+  } else if (actionType.status === "delivery") {
+    updateStatus = DeliveryStatus.OUT_FOR_DELIVERY;
+  }
+
+  await Parcel.updateMany(filter, { $set: { status: updateStatus } });
+
+  // Update rider profile status
+  await User.findByIdAndUpdate(decodedToken.userId, {
+    $set: {
+      "riderProfile.availabilityStatus": RiderAvailabilityStatus.ON_DELIVERY,
+    },
+  });
+
+  return parcels;
+};
+
 export const UserService = {
   createUser,
   getAllUsers,
   updateUser,
   addNewAddress,
+  updateRiderStatus,
 };

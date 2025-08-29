@@ -26,6 +26,18 @@ router.get(
 );
 
 router.get(
+  "/rider/pickup/me",
+  checkAuth(Role.RIDER),
+  ParcelController.getMyPickupParcels
+);
+
+router.get(
+  "/rider/delivery/me",
+  checkAuth(Role.RIDER),
+  ParcelController.getMyDeliveryParcels
+);
+
+router.get(
   "/track/:trackingId",
   checkAuth(...Object.values(Role)),
   ParcelController.trackParcel

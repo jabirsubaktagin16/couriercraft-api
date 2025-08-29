@@ -225,6 +225,56 @@ const getMyIncomingParcels = async (
   };
 };
 
+const getMyPickupParcels = async (
+  query: Record<string, string>,
+  decodedToken: JwtPayload
+) => {
+  const queryBuilder = new QueryBuilder(
+    Parcel.find({ pickupRider: decodedToken.userId })
+      .populate("sender", "name phone")
+      .populate("receiver", "name phone")
+      .populate("parcelType", "parcelType"),
+    query
+  );
+
+  const parcels = await queryBuilder.filter().sort().fields().paginate();
+
+  const [data, meta] = await Promise.all([
+    parcels.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
+};
+
+const getMyDeliveryParcels = async (
+  query: Record<string, string>,
+  decodedToken: JwtPayload
+) => {
+  const queryBuilder = new QueryBuilder(
+    Parcel.find({ deliveryRider: decodedToken.userId })
+      .populate("sender", "name phone")
+      .populate("receiver", "name phone")
+      .populate("parcelType", "parcelType"),
+    query
+  );
+
+  const parcels = await queryBuilder.filter().sort().fields().paginate();
+
+  const [data, meta] = await Promise.all([
+    parcels.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
+};
+
 const trackParcel = async (trackingId: string, decodedToken: JwtPayload) => {
   const parcel = await Parcel.findOne({ trackingId: trackingId })
     .populate("sender", "name phone")
@@ -642,6 +692,8 @@ export const ParcelService = {
   createNewParcel,
   getMySentParcels,
   getMyIncomingParcels,
+  getMyPickupParcels,
+  getMyDeliveryParcels,
   updateParcel,
   trackParcel,
 };
