@@ -260,120 +260,206 @@ const updateParcel = async (
   if (!parcel)
     throw new AppError(httpStatusCodes.NOT_FOUND, "Parcel not found");
 
-  // ----- Status & role based permission checks -----
-  if (payload.status === DeliveryStatus.CANCELLED) {
-    if (
-      decodedToken.role !== Role.USER ||
-      decodedToken.userId.toString() !== parcel.sender.toString()
-    ) {
-      throw new AppError(
-        httpStatusCodes.FORBIDDEN,
-        "Only the sender can request cancellation"
-      );
+  const currentStatus = parcel.status;
+  const requestedStatus = payload.status;
+
+  // -------------------- STATUS & ROLE BASED PERMISSIONS --------------------
+  switch (requestedStatus) {
+    // -------------------- USER --------------------
+    case DeliveryStatus.CANCELLED:
+      if (
+        decodedToken.role !== Role.USER ||
+        decodedToken.userId.toString() !== parcel.sender.toString()
+      ) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "Only the sender can request cancellation"
+        );
+      }
+      if (currentStatus !== DeliveryStatus.PENDING) {
+        throw new AppError(
+          httpStatusCodes.BAD_REQUEST,
+          "Can only cancel when parcel is still pending"
+        );
+      }
+      parcel.status = DeliveryStatus.CANCELLED;
+      break;
+
+    // -------------------- ADMIN --------------------
+    case DeliveryStatus.APPROVED:
+    case DeliveryStatus.REJECTED:
+      if (
+        decodedToken.role !== Role.ADMIN &&
+        decodedToken.role !== Role.SUPER_ADMIN
+      ) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "Only admin can approve or reject parcels"
+        );
+      }
+      if (currentStatus !== DeliveryStatus.PENDING) {
+        throw new AppError(
+          httpStatusCodes.BAD_REQUEST,
+          "Only pending parcels can be approved or rejected"
+        );
+      }
+      parcel.status = requestedStatus;
+      break;
+
+    // -------------------- RIDER (Pickup phase) --------------------
+    case DeliveryStatus.PICKED_UP:
+      if (decodedToken.role !== Role.RIDER) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "Only rider can update pickup status"
+        );
+      }
+      if (decodedToken.userId.toString() !== parcel.pickupRider?.toString()) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "You are not assigned as pickup rider"
+        );
+      }
+      if (currentStatus !== DeliveryStatus.APPROVED) {
+        throw new AppError(
+          httpStatusCodes.BAD_REQUEST,
+          "Parcel must be approved before pickup"
+        );
+      }
+      parcel.status = DeliveryStatus.PICKED_UP;
+      break;
+
+    case DeliveryStatus.IN_TRANSIT:
+    case DeliveryStatus.AT_HUB:
+      if (decodedToken.role !== Role.RIDER) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "Only rider can update transit status"
+        );
+      }
+      if (decodedToken.userId.toString() !== parcel.pickupRider?.toString()) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "You are not assigned as pickup rider"
+        );
+      }
+      if (currentStatus !== DeliveryStatus.PICKED_UP) {
+        throw new AppError(
+          httpStatusCodes.BAD_REQUEST,
+          "Parcel must be picked up before moving to in-transit or at hub"
+        );
+      }
+      parcel.status = requestedStatus;
+      break;
+
+    // -------------------- RIDER (Delivery phase) --------------------
+    case DeliveryStatus.OUT_FOR_DELIVERY:
+      if (decodedToken.role !== Role.RIDER) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "Only rider can update delivery status"
+        );
+      }
+      if (decodedToken.userId.toString() !== parcel.deliveryRider?.toString()) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "You are not assigned as delivery rider"
+        );
+      }
+      if (currentStatus !== DeliveryStatus.AT_HUB) {
+        throw new AppError(
+          httpStatusCodes.BAD_REQUEST,
+          "Parcel must arrive at hub before going out for delivery"
+        );
+      }
+      parcel.status = DeliveryStatus.OUT_FOR_DELIVERY;
+      break;
+
+    case DeliveryStatus.DELIVERED:
+      if (decodedToken.role !== Role.RIDER) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "Only rider can mark as delivered"
+        );
+      }
+      if (decodedToken.userId.toString() !== parcel.deliveryRider?.toString()) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "You are not assigned as delivery rider"
+        );
+      }
+      if (currentStatus !== DeliveryStatus.OUT_FOR_DELIVERY) {
+        throw new AppError(
+          httpStatusCodes.BAD_REQUEST,
+          "Parcel must be out for delivery before being marked as delivered"
+        );
+      }
+      parcel.status = DeliveryStatus.DELIVERED;
+      break;
+
+    case DeliveryStatus.DELIVERY_FAILED:
+    case DeliveryStatus.REASSIGNED:
+      if (decodedToken.role !== Role.RIDER) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "Only rider can update failed/reassigned status"
+        );
+      }
+      if (decodedToken.userId.toString() !== parcel.deliveryRider?.toString()) {
+        throw new AppError(
+          httpStatusCodes.FORBIDDEN,
+          "You are not assigned as delivery rider"
+        );
+      }
+      if (currentStatus !== DeliveryStatus.OUT_FOR_DELIVERY) {
+        throw new AppError(
+          httpStatusCodes.BAD_REQUEST,
+          "Can only mark as failed/reassigned when out for delivery"
+        );
+      }
+      parcel.status = requestedStatus;
+      break;
+
+    default:
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "Invalid status update");
+  }
+
+  // -------------------- HUB VALIDATIONS --------------------
+  if (payload.pickupHub) {
+    const hub = await Hub.findById(payload.pickupHub);
+    if (!hub) {
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "Pickup hub not found");
     }
-    if (parcel.status !== DeliveryStatus.PENDING) {
-      throw new AppError(
-        httpStatusCodes.BAD_REQUEST,
-        "Can only request cancellation when pending"
-      );
-    }
-    parcel.status = DeliveryStatus.CANCELLED;
-  } else if (
-    [
-      DeliveryStatus.CANCELLED,
-      DeliveryStatus.REJECTED,
-      DeliveryStatus.APPROVED,
-    ].includes(payload.status!)
-  ) {
     if (
       decodedToken.role !== Role.ADMIN &&
       decodedToken.role !== Role.SUPER_ADMIN
     ) {
       throw new AppError(
         httpStatusCodes.FORBIDDEN,
-        "Only admin can approve/reject/cancel"
+        "You can not assign pickup hub"
       );
     }
-    parcel.status = payload.status!;
-  } else if (
-    [DeliveryStatus.OUT_FOR_DELIVERY, DeliveryStatus.DELIVERED].includes(
-      payload.status!
-    )
-  ) {
-    if (decodedToken.role !== Role.RIDER) {
-      throw new AppError(
-        httpStatusCodes.FORBIDDEN,
-        "Only rider can update delivery status"
-      );
-    }
-    if (decodedToken.userId.toString() !== parcel.deliveryRider?.toString()) {
-      throw new AppError(
-        httpStatusCodes.FORBIDDEN,
-        "You are not assigned as delivery rider"
-      );
-    }
-    parcel.status = payload.status!;
-  } else if (
-    [DeliveryStatus.PICKED_UP, DeliveryStatus.AT_HUB].includes(payload.status!)
-  ) {
-    if (decodedToken.role !== Role.RIDER) {
-      throw new AppError(
-        httpStatusCodes.FORBIDDEN,
-        "Only rider can update pickup status"
-      );
-    }
-    if (decodedToken.userId.toString() !== parcel.pickupRider?.toString()) {
-      throw new AppError(
-        httpStatusCodes.FORBIDDEN,
-        "You are not assigned as pickup rider"
-      );
-    }
-    parcel.status = payload.status!;
-  } else {
-    throw new AppError(httpStatusCodes.BAD_REQUEST, "Invalid status update");
+    parcel.pickupHub = payload.pickupHub;
   }
 
-  // Pickup Hub Validation
-  if (payload.pickupHub) {
-    const hub = await Hub.findById(payload.pickupHub);
-    if (!hub) {
-      throw new AppError(httpStatusCodes.BAD_REQUEST, "Pickup hub not found");
-    } else {
-      if (
-        decodedToken.role !== Role.ADMIN &&
-        decodedToken.role !== Role.SUPER_ADMIN
-      ) {
-        throw new AppError(
-          httpStatusCodes.FORBIDDEN,
-          "You can not assign pickup hub"
-        );
-      } else {
-        parcel.pickupHub = payload.pickupHub;
-      }
-    }
-  }
-
-  // Delivery Hub Validation
   if (payload.deliveryHub) {
     const hub = await Hub.findById(payload.deliveryHub);
     if (!hub) {
       throw new AppError(httpStatusCodes.BAD_REQUEST, "Delivery hub not found");
-    } else {
-      if (
-        decodedToken.role !== Role.ADMIN &&
-        decodedToken.role !== Role.SUPER_ADMIN
-      ) {
-        throw new AppError(
-          httpStatusCodes.FORBIDDEN,
-          "You can not assign delivery hub"
-        );
-      } else {
-        parcel.deliveryHub = payload.deliveryHub;
-      }
     }
+    if (
+      decodedToken.role !== Role.ADMIN &&
+      decodedToken.role !== Role.SUPER_ADMIN
+    ) {
+      throw new AppError(
+        httpStatusCodes.FORBIDDEN,
+        "You can not assign delivery hub"
+      );
+    }
+    parcel.deliveryHub = payload.deliveryHub;
   }
 
-  // ---------- pickup rider validation & assignment ----------
+  // -------------------- RIDER ASSIGNMENTS (Admin only) --------------------
   if (payload.pickupRider) {
     const pickupRiderInfo = await User.findById(payload.pickupRider);
     if (!pickupRiderInfo || pickupRiderInfo.role !== Role.RIDER) {
@@ -382,35 +468,27 @@ const updateParcel = async (
         "Pickup rider not found or not a rider"
       );
     }
-
-    // Hub match: prefer rider.riderProfile.assignedHubId, fallback to other shapes
-    const riderAssignedHubId = pickupRiderInfo.riderProfile?.assignedHub;
-
-    const parcelPickupHubId = payload.pickupHub?.toString?.();
-
     if (
-      !riderAssignedHubId ||
-      riderAssignedHubId.toString() !== parcelPickupHubId
+      pickupRiderInfo.riderProfile?.assignedHub?.toString() !==
+      parcel.pickupHub?.toString()
     ) {
       throw new AppError(
         httpStatusCodes.BAD_REQUEST,
         "Pickup rider must be assigned to the parcel's pickup hub"
       );
     }
-
-    // Availability check (must be AVAILABLE)
-    const riderStatus = pickupRiderInfo.riderProfile?.availabilityStatus;
-    if (riderStatus !== RiderAvailabilityStatus.AVAILABLE) {
+    if (
+      pickupRiderInfo.riderProfile?.availabilityStatus !==
+      RiderAvailabilityStatus.AVAILABLE
+    ) {
       throw new AppError(
         httpStatusCodes.BAD_REQUEST,
-        "Pickup rider is not available for assignment"
+        "Pickup rider is not available"
       );
     }
-
     parcel.pickupRider = payload.pickupRider;
   }
 
-  // ---------- delivery rider validation & assignment ----------
   if (payload.deliveryRider) {
     const deliveryRider = await User.findById(payload.deliveryRider);
     if (!deliveryRider || deliveryRider.role !== Role.RIDER) {
@@ -419,36 +497,30 @@ const updateParcel = async (
         "Delivery rider not found or not a rider"
       );
     }
-
-    // Hub match: prefer rider.riderProfile.assignedHubId, fallback to other shapes
-    const riderAssignedDeliveryHubId = deliveryRider.riderProfile?.assignedHub;
-
-    const parcelDeliveryHubId = payload.deliveryHub?.toString?.();
-
     if (
-      !riderAssignedDeliveryHubId ||
-      riderAssignedDeliveryHubId.toString() !== parcelDeliveryHubId
+      deliveryRider.riderProfile?.assignedHub?.toString() !==
+      parcel.deliveryHub?.toString()
     ) {
       throw new AppError(
         httpStatusCodes.BAD_REQUEST,
         "Delivery rider must be assigned to the parcel's delivery hub"
       );
     }
-
-    // Availability check (must be AVAILABLE)
-    const deliveryRiderStatus = deliveryRider.riderProfile?.availabilityStatus;
-    if (deliveryRiderStatus !== RiderAvailabilityStatus.AVAILABLE) {
+    if (
+      deliveryRider.riderProfile?.availabilityStatus !==
+      RiderAvailabilityStatus.AVAILABLE
+    ) {
       throw new AppError(
         httpStatusCodes.BAD_REQUEST,
-        "Delivery rider is not available for assignment"
+        "Delivery rider is not available"
       );
     }
-
     parcel.deliveryRider = payload.deliveryRider;
   }
 
+  // -------------------- TRACKING LOG --------------------
   const trackingLogEntry = {
-    status: payload.status as DeliveryStatus,
+    status: requestedStatus!,
     updatedBy: decodedToken.userId as Types.ObjectId,
   };
 
